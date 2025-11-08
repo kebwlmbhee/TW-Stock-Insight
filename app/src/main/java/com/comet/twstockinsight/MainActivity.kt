@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,6 +89,7 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
     Log.d(TAG, "StockInfoList: size: $size")
 
     val showDialog = remember { mutableStateOf(false) }
+    val selectedName = remember { mutableStateOf(null as String?) }
     val selectedBwi = remember { mutableStateOf<StockBwi?>(null) }
     LazyColumn(
         modifier = modifier
@@ -100,8 +102,11 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
             StockCard(
                 stockDetailList?.get(item),
                 stockAverageList?.get(item),
-                onClickBwi = { stockCode ->
-                    val matchedBwi = stockBwiList?.firstOrNull { it.code == stockCode }
+                onClickBwi = { stockCode, stockName ->
+                    val matchedBwi = stockBwiList?.firstOrNull {
+                        it.code == stockCode
+                    }
+                    selectedName.value = stockName
                     selectedBwi.value = matchedBwi
                     showDialog.value = true
                 })
@@ -117,12 +122,30 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
                     Text("OK")
                 }
             },
-            title = { Text(text = selectedBwi.value?.name ?: "Bwi Info") },
+            title = { Text(
+                text = selectedName.value ?: "--"
+            ) },
             text = {
                 Text(
-                    "殖利率: ${selectedBwi.value?.dividendYield ?: "--"}\n" +
-                            "本益比: ${selectedBwi.value?.peRatio ?: "--"}\n" +
-                            "股價淨值比: ${selectedBwi.value?.pbRatio ?: "--"}"
+                    text = buildString {
+                        val bwiValue = selectedBwi.value
+                        append(stringResource(
+                            R.string.stock_dividend,
+                            bwiValue?.dividendYield ?:
+                            stringResource(R.string.not_provided))
+                        )
+                        .append("\n")
+                        .append(stringResource(
+                            R.string.stock_pe,
+                            bwiValue?.peRatio ?:
+                            stringResource(R.string.not_provided))
+                        )
+                        .append("\n")
+                        .append(stringResource(R.string.stock_pb,
+                            bwiValue?.pbRatio ?:
+                            stringResource(R.string.not_provided))
+                        )
+                    }
                 )
             }
         )
@@ -133,7 +156,7 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
 fun StockCard(
     stockDetail: StockDetail?,
     stockAverage: StockAverage?,
-    onClickBwi: ((String) -> Unit)? = null
+    onClickBwi: ((String, String) -> Unit)? = null
 ) {
     Card(
         modifier = Modifier
@@ -143,7 +166,7 @@ fun StockCard(
                 indication = LocalIndication.current,
                 interactionSource = remember { MutableInteractionSource() }
             ) {
-                onClickBwi?.invoke(stockDetail?.code ?: "")
+                onClickBwi?.invoke(stockDetail?.code ?: "", stockDetail?.name ?: "")
             },
         // shadow
         elevation = CardDefaults.cardElevation(4.dp)
@@ -158,9 +181,9 @@ fun StockCard(
 fun StockTransaction(stockDetail: StockDetail?,
                      modifier: Modifier = Modifier) {
     val transaction = listOf(
-        "成交筆數" to (stockDetail?.transaction ?: "--"),
-        "成交股數" to (stockDetail?.tradeVolume ?: "--"),
-        "成交金額" to (stockDetail?.tradeValue ?: "--")
+        stringResource(R.string.transaction) to (stockDetail?.transaction ?: "--"),
+        stringResource(R.string.trade_volume) to (stockDetail?.tradeVolume ?: "--"),
+        stringResource(R.string.trade_value) to (stockDetail?.tradeValue ?: "--")
     )
 
     Row(Modifier.padding(horizontal = 16.dp)) {
@@ -181,12 +204,12 @@ fun StockPriceGrid(stockDetail: StockDetail?,
                    stockAverage: StockAverage?,
                    modifier: Modifier = Modifier) {
     val details = listOf(
-        "開盤價" to (stockDetail?.openingPrice ?: "--"),
-        "收盤價" to (stockDetail?.closingPrice ?: "--"),
-        "最高價" to (stockDetail?.highestPrice ?: "--"),
-        "最低價" to (stockDetail?.lowestPrice ?: "--"),
-        "漲跌價差" to (stockDetail?.change ?: "--"),
-        "月平均價" to (stockAverage?.monthlyAveragePrice ?: "--"),
+        stringResource(R.string.opening_price) to (stockDetail?.openingPrice ?: "--"),
+        stringResource(R.string.closeing_price) to (stockDetail?.closingPrice ?: "--"),
+        stringResource(R.string.highest_price) to (stockDetail?.highestPrice ?: "--"),
+        stringResource(R.string.lowest_price) to (stockDetail?.lowestPrice ?: "--"),
+        stringResource(R.string.price_change) to (stockDetail?.change ?: "--"),
+        stringResource(R.string.monthly_average_price) to (stockAverage?.monthlyAveragePrice ?: "--"),
     )
 
     Column(
