@@ -5,10 +5,16 @@ import com.comet.twstockinsight.data.model.StockAverage
 import com.comet.twstockinsight.data.model.StockBwi
 import com.comet.twstockinsight.data.model.StockDetail
 import com.comet.twstockinsight.data.repository.StockRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class MainViewModel : ViewModel() {
+    companion object {
+        private val TAG = MainViewModel::class.qualifiedName
+    }
     private val stockRepo = StockRepository()
     private val _stockDetailList = MutableStateFlow<List<StockDetail>?>(null)
     val stockDetailList = _stockDetailList.asStateFlow()
@@ -17,19 +23,17 @@ class MainViewModel : ViewModel() {
     private val _stockBwiList = MutableStateFlow<List<StockBwi>?>(null)
     val stockBwiList = _stockBwiList.asStateFlow()
 
-    suspend fun fetchStockBwi() {
-        _stockBwiList.value = stockRepo.getStockBwi()
-    }
-    suspend fun fetchStockAverage() {
-        _stockAverageList.value = stockRepo.getStockAverage()
-    }
-    suspend fun fetchStockDetail() {
-        _stockDetailList.value = stockRepo.getStockDetail()
-    }
+    // async must be called from a CoroutineScope
+    suspend fun fetchAllConcurrently() = coroutineScope {
+        while (true) {
+            val bwi = async { stockRepo.getStockBwi() }
+            val average = async { stockRepo.getStockAverage() }
+            val detail = async { stockRepo.getStockDetail() }
 
-    suspend fun fetchAll() {
-        fetchStockDetail()
-        fetchStockAverage()
-        fetchStockBwi()
+            _stockBwiList.value = bwi.await()
+            _stockAverageList.value = average.await()
+            _stockDetailList.value = detail.await()
+            delay(5000)
+        }
     }
 }

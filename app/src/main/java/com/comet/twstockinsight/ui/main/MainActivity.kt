@@ -35,6 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.comet.twstockinsight.R
 import com.comet.twstockinsight.data.model.StockAverage
 import com.comet.twstockinsight.data.model.StockBwi
@@ -65,13 +68,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(mMainViewModel: MainViewModel) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val stockDetailList = mMainViewModel.stockDetailList.collectAsState()
     val stockAverageList = mMainViewModel.stockAverageList.collectAsState()
     val stockBwiList = mMainViewModel.stockBwiList.collectAsState()
 
     // load data only first time
-    LaunchedEffect(Unit) {
-        mMainViewModel.fetchAll()
+    LaunchedEffect(lifecycleOwner) {
+        // only update UI when activity is in started state
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            mMainViewModel.fetchAllConcurrently()
+        }
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
