@@ -1,4 +1,4 @@
-package com.comet.twstockinsight
+package com.comet.twstockinsight.ui.main
 
 import android.os.Bundle
 import android.util.Log
@@ -35,10 +35,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.comet.twstockinsight.R
 import com.comet.twstockinsight.data.model.StockAverage
 import com.comet.twstockinsight.data.model.StockBwi
+import com.comet.twstockinsight.data.model.StockColorResult
 import com.comet.twstockinsight.data.model.StockDetail
 import com.comet.twstockinsight.ui.theme.TWStockInsightTheme
+import com.comet.twstockinsight.ui.theme.Green
+import com.comet.twstockinsight.ui.theme.Red
+import com.comet.twstockinsight.util.Constants
 
 class MainActivity : ComponentActivity() {
 
@@ -123,7 +128,7 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
                 }
             },
             title = { Text(
-                text = selectedName.value ?: "--"
+                text = selectedName.value ?: Constants.NO_DATA
             ) },
             text = {
                 Text(
@@ -141,7 +146,8 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
                             stringResource(R.string.not_provided))
                         )
                         .append("\n")
-                        .append(stringResource(R.string.stock_pb,
+                        .append(stringResource(
+                            R.string.stock_pb,
                             bwiValue?.pbRatio ?:
                             stringResource(R.string.not_provided))
                         )
@@ -181,9 +187,9 @@ fun StockCard(
 fun StockTransaction(stockDetail: StockDetail?,
                      modifier: Modifier = Modifier) {
     val transaction = listOf(
-        stringResource(R.string.transaction) to (stockDetail?.transaction ?: "--"),
-        stringResource(R.string.trade_volume) to (stockDetail?.tradeVolume ?: "--"),
-        stringResource(R.string.trade_value) to (stockDetail?.tradeValue ?: "--")
+        stringResource(R.string.transaction) to (stockDetail?.transaction ?: Constants.NO_DATA),
+        stringResource(R.string.trade_volume) to (stockDetail?.tradeVolume ?: Constants.NO_DATA),
+        stringResource(R.string.trade_value) to (stockDetail?.tradeValue ?: Constants.NO_DATA)
     )
 
     Row(Modifier.padding(horizontal = 16.dp)) {
@@ -204,12 +210,12 @@ fun StockPriceGrid(stockDetail: StockDetail?,
                    stockAverage: StockAverage?,
                    modifier: Modifier = Modifier) {
     val details = listOf(
-        stringResource(R.string.opening_price) to (stockDetail?.openingPrice ?: "--"),
-        stringResource(R.string.closeing_price) to (stockDetail?.closingPrice ?: "--"),
-        stringResource(R.string.highest_price) to (stockDetail?.highestPrice ?: "--"),
-        stringResource(R.string.lowest_price) to (stockDetail?.lowestPrice ?: "--"),
-        stringResource(R.string.price_change) to (stockDetail?.change ?: "--"),
-        stringResource(R.string.monthly_average_price) to (stockAverage?.monthlyAveragePrice ?: "--"),
+        stringResource(R.string.opening_price) to (stockDetail?.openingPrice ?: Constants.NO_DATA),
+        stringResource(R.string.closeing_price) to (stockDetail?.closingPrice ?: Constants.NO_DATA),
+        stringResource(R.string.highest_price) to (stockDetail?.highestPrice ?: Constants.NO_DATA),
+        stringResource(R.string.lowest_price) to (stockDetail?.lowestPrice ?: Constants.NO_DATA),
+        stringResource(R.string.price_change) to (stockDetail?.change ?: Constants.NO_DATA),
+        stringResource(R.string.monthly_average_price) to (stockAverage?.monthlyAveragePrice ?: Constants.NO_DATA),
     )
 
     Column(
@@ -223,9 +229,22 @@ fun StockPriceGrid(stockDetail: StockDetail?,
             Row {
                 for (column in 0 until 2) {
                     val index = row * 2 + column
+                    val colorResult = StockColors(stockDetail, stockAverage)
+                    val color = when (index) {
+                        1 -> {
+                            colorResult.closePriceColor
+                        }
+                        4 -> {
+                            colorResult.priceChangeColor
+                        }
+                        else -> {
+                            Color.Unspecified
+                        }
+                    }
                     Text(
                         text = "${details[index].first}: ${details[index].second}",
                         fontSize = 12.sp,
+                        color = color,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -235,18 +254,40 @@ fun StockPriceGrid(stockDetail: StockDetail?,
 }
 
 @Composable
+private fun StockColors(
+    stockDetail: StockDetail?,
+    stockAverage: StockAverage?
+): StockColorResult  {
+    val closingPriceDouble = stockDetail?.closingPrice?.toDoubleOrNull() ?: 0.0
+    val monthlyAveragePriceDouble = stockAverage?.monthlyAveragePrice?.toDoubleOrNull() ?: 0.0
+    val closePriceColor = when {
+        closingPriceDouble > monthlyAveragePriceDouble -> Red
+        closingPriceDouble < monthlyAveragePriceDouble -> Green
+        else -> Color.Unspecified
+    }
+
+    val priceChangeDouble = stockDetail?.change?.toDoubleOrNull() ?: 0.0
+    val priceChangeColor = when {
+        priceChangeDouble > 0 -> Red
+        priceChangeDouble < 0.0 -> Green
+        else -> Color.Unspecified
+    }
+    return StockColorResult(closePriceColor, priceChangeColor)
+}
+
+@Composable
 private fun StockTitle(stockDetail: StockDetail?,
                        modifier: Modifier = Modifier) {
     Column {
         Text(
-            text = stockDetail?.code ?: "--",
+            text = stockDetail?.code ?: Constants.NO_DATA,
             fontSize = 12.sp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, top = 8.dp)
         )
         Text(
-            text = stockDetail?.name ?: "----",
+            text = stockDetail?.name ?: Constants.NO_NAME,
             fontSize = 20.sp,
             modifier = Modifier
                 .padding(8.dp)

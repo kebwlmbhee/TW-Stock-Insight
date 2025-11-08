@@ -1,4 +1,4 @@
-package com.comet.twstockinsight
+package com.comet.twstockinsight.ui.main
 
 import androidx.lifecycle.ViewModel
 import com.comet.twstockinsight.data.model.StockAverage
