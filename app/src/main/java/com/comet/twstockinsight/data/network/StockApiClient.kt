@@ -6,7 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object StockApiClient {
-    private const val BASE_URL = "https://openapi.twse.com.tw/v1"
+    private const val BASE_URL = "https://openapi.twse.com.tw/v1/"
 
     private val retrofit by lazy {
         Retrofit.Builder()

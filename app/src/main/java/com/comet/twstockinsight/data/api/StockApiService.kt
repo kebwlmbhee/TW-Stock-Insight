@@ -6,12 +6,12 @@ import com.comet.twstockinsight.data.model.StockDetail
 import retrofit2.http.GET
 
 interface StockApiService {
-    @GET("/exchangeReport/BWIBBU_ALL")
-    fun getStockBwi(): List<StockBwi>
+    @GET("exchangeReport/BWIBBU_ALL")
+    suspend fun getStockBwi(): List<StockBwi>
 
-    @GET("/exchangeReport/STOCK_DAY_AVG_ALL")
-    fun getStockAverage(): List<StockAverage>
+    @GET("exchangeReport/STOCK_DAY_AVG_ALL")
+    suspend fun getStockAverage(): List<StockAverage>
 
-    @GET("/exchangeReport/STOCK_DAY_ALL")
-    fun getStockDetail(): List<StockDetail>
+    @GET("exchangeReport/STOCK_DAY_ALL")
+    suspend fun getStockDetail(): List<StockDetail>
 }
