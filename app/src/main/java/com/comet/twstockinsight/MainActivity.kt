@@ -1,10 +1,14 @@
 package com.comet.twstockinsight
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,56 +17,64 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
 import com.comet.twstockinsight.data.model.StockAverage
 import com.comet.twstockinsight.data.model.StockBwi
 import com.comet.twstockinsight.data.model.StockDetail
 import com.comet.twstockinsight.ui.theme.TWStockInsightTheme
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private val mViewModel: MainViewModel by viewModels()
+    companion object {
+        private val TAG = MainActivity::class.qualifiedName
+    }
+
+    private val mMainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             TWStockInsightTheme {
-                // load data when first time
-                LaunchedEffect(Unit) {
-                    val stockDetailList = mViewModel.fetchStockDetail()
-                    val stockAverageList = mViewModel.fetchStockAverage()
-                    val bwiList = mViewModel.fetchStockBwi()
-                }
-
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    StockInfoList(
-                        stockDetailList = null,
-                        stockAverageList = null,
-                        stockBwiList = null,
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MainScreen(mMainViewModel = mMainViewModel)
             }
         }
-        lifecycleScope.launch {
-            val stockDetailList: List<StockDetail> = mViewModel.fetchStockDetail()
-            val stockAverageList: List<StockAverage> = mViewModel.fetchStockAverage()
-            val bwiList: List<StockBwi> = mViewModel.fetchStockBwi()
-        }
+    }
+}
+
+@Composable
+fun MainScreen(mMainViewModel: MainViewModel) {
+    val stockDetailList = mMainViewModel.stockDetailList.collectAsState()
+    val stockAverageList = mMainViewModel.stockAverageList.collectAsState()
+    val stockBwiList = mMainViewModel.stockBwiList.collectAsState()
+
+    // load data only first time
+    LaunchedEffect(Unit) {
+        mMainViewModel.fetchAll()
+    }
+
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        StockInfoList(
+            stockDetailList.value,
+            stockAverageList.value,
+            stockBwiList.value,
+            modifier = Modifier.padding(innerPadding)
+        )
     }
 }
 
@@ -71,48 +83,84 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
                   stockAverageList: List<StockAverage>?,
                   stockBwiList: List<StockBwi>?,
                   modifier: Modifier = Modifier) {
-    val items = (1..20).toList()
+    val TAG = "StockInfoList"
+    val size = stockDetailList?.size ?: 0
+    Log.d(TAG, "StockInfoList: size: $size")
+
+    val showDialog = remember { mutableStateOf(false) }
+    val selectedBwi = remember { mutableStateOf<StockBwi?>(null) }
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(Color.LightGray),
         contentPadding = PaddingValues(vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(items) { item ->
+        items(size) { item ->
             StockCard(
                 stockDetailList?.get(item),
                 stockAverageList?.get(item),
-                stockBwiList?.get(item))
+                onClickBwi = { stockCode ->
+                    val matchedBwi = stockBwiList?.firstOrNull { it.code == stockCode }
+                    selectedBwi.value = matchedBwi
+                    showDialog.value = true
+                })
         }
+    }
+
+    // AlertDialog showing Bwi content
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            confirmButton = {
+                TextButton(onClick = { showDialog.value = false }) {
+                    Text("OK")
+                }
+            },
+            title = { Text(text = selectedBwi.value?.name ?: "Bwi Info") },
+            text = {
+                Text(
+                    "殖利率: ${selectedBwi.value?.dividendYield ?: "--"}\n" +
+                            "本益比: ${selectedBwi.value?.peRatio ?: "--"}\n" +
+                            "股價淨值比: ${selectedBwi.value?.pbRatio ?: "--"}"
+                )
+            }
+        )
     }
 }
 
 @Composable
-fun StockCard(stockDetail: StockDetail?,
-              stockAverage: StockAverage?,
-              stockBwi: StockBwi?) {
+fun StockCard(
+    stockDetail: StockDetail?,
+    stockAverage: StockAverage?,
+    onClickBwi: ((String) -> Unit)? = null
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 8.dp)
+            .clickable(
+                indication = LocalIndication.current,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                onClickBwi?.invoke(stockDetail?.code ?: "")
+            },
         // shadow
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         StockTitle(stockDetail)
         StockPriceGrid(stockDetail, stockAverage)
-        StockTransaction(stockDetail, stockBwi)
+        StockTransaction(stockDetail)
     }
 }
 
 @Composable
 fun StockTransaction(stockDetail: StockDetail?,
-                     stockBwi: StockBwi?,
                      modifier: Modifier = Modifier) {
     val transaction = listOf(
-        "成交筆數" to "100",
-        "成交股價" to "200",
-        "成交金額" to "300",
+        "成交筆數" to (stockDetail?.transaction ?: "--"),
+        "成交股數" to (stockDetail?.tradeVolume ?: "--"),
+        "成交金額" to (stockDetail?.tradeValue ?: "--")
     )
 
     Row(Modifier.padding(horizontal = 16.dp)) {
@@ -133,12 +181,12 @@ fun StockPriceGrid(stockDetail: StockDetail?,
                    stockAverage: StockAverage?,
                    modifier: Modifier = Modifier) {
     val details = listOf(
-        "開盤價" to "623.0",
-        "收盤價" to "625.0",
-        "最高價" to "630.0",
-        "最低價" to "620.0",
-        "漲跌價差" to "18.2",
-        "月平均價" to "631",
+        "開盤價" to (stockDetail?.openingPrice ?: "--"),
+        "收盤價" to (stockDetail?.closingPrice ?: "--"),
+        "最高價" to (stockDetail?.highestPrice ?: "--"),
+        "最低價" to (stockDetail?.lowestPrice ?: "--"),
+        "漲跌價差" to (stockDetail?.change ?: "--"),
+        "月平均價" to (stockAverage?.monthlyAveragePrice ?: "--"),
     )
 
     Column(
