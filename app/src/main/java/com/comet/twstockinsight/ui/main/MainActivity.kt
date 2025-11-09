@@ -144,20 +144,20 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
                         val bwiValue = selectedBwi.value
                         append(stringResource(
                             R.string.stock_dividend,
-                            bwiValue?.dividendYield ?:
-                            stringResource(R.string.not_provided))
+                            bwiValue?.dividendYield.takeIf { !it.isNullOrBlank() }
+                                ?: stringResource(R.string.not_provided))
                         )
                         .append("\n")
                         .append(stringResource(
                             R.string.stock_pe,
-                            bwiValue?.peRatio ?:
-                            stringResource(R.string.not_provided))
+                            bwiValue?.peRatio.takeIf { !it.isNullOrBlank() }
+                                ?: stringResource(R.string.not_provided))
                         )
                         .append("\n")
                         .append(stringResource(
                             R.string.stock_pb,
-                            bwiValue?.pbRatio ?:
-                            stringResource(R.string.not_provided))
+                            bwiValue?.pbRatio.takeIf { !it.isNullOrBlank() }
+                                ?: stringResource(R.string.not_provided))
                         )
                     }
                 )
