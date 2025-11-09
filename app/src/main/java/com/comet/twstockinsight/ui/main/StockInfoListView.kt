@@ -104,7 +104,7 @@ class StockInfoListView {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun StockInfoListViewPreview() {
     val mainViewModel = FakeMainViewModel()

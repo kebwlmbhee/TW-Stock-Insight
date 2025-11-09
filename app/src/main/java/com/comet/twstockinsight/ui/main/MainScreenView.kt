@@ -155,7 +155,7 @@ class MainScreenView {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun MainScreenViewPreview() {
     TWStockInsightTheme {
