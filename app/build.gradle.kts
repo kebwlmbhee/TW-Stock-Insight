@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.comet.twstockinsight"
+    namespace = "com.comet.cometstocks"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.comet.twstockinsight"
+        applicationId = "com.comet.cometstocks"
         minSdk = 28
         targetSdk = 36
         versionCode = 1

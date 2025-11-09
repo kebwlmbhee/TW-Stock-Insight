@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TW Stock Insight"
+rootProject.name = "Comet Stocks"
 include(":app")
  
