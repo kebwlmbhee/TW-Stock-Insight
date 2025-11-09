@@ -1,4 +1,4 @@
-package com.comet.twstockinsight.ui.main
+package com.comet.twstockinsight.ui.main.viewmodel
 
 import com.comet.twstockinsight.data.model.StockAverage
 import com.comet.twstockinsight.data.model.StockBwi

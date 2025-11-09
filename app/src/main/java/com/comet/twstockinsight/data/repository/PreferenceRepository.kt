@@ -1,7 +1,7 @@
 package com.comet.twstockinsight.data.repository
 
 import android.content.Context
-import com.comet.twstockinsight.ui.main.SortOrder
+import com.comet.twstockinsight.ui.main.viewmodel.SortOrder
 import androidx.core.content.edit
 
 class PreferenceRepository(context: Context) {

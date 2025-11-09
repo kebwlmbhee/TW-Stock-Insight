@@ -1,4 +1,4 @@
-package com.comet.twstockinsight.ui.main
+package com.comet.twstockinsight.ui.main.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
