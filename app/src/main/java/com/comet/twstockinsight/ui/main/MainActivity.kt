@@ -62,15 +62,18 @@ import com.comet.twstockinsight.data.model.StockAverage
 import com.comet.twstockinsight.data.model.StockBwi
 import com.comet.twstockinsight.data.model.StockColorResult
 import com.comet.twstockinsight.data.model.StockDetail
+import com.comet.twstockinsight.ui.main.MainActivity.Companion.NO_DATA
+import com.comet.twstockinsight.ui.main.MainActivity.Companion.NO_NAME
 import com.comet.twstockinsight.ui.theme.Green
 import com.comet.twstockinsight.ui.theme.Red
 import com.comet.twstockinsight.ui.theme.TWStockInsightTheme
-import com.comet.twstockinsight.util.Constants
 
 class MainActivity : ComponentActivity() {
 
     companion object {
         private val TAG = MainActivity::class.qualifiedName
+        const val NO_DATA = "--"
+        const val NO_NAME = "----"
     }
 
     private val mMainViewModel: MainViewModel by viewModels()
@@ -236,7 +239,7 @@ fun StockInfoList(stockDetailList: List<StockDetail>?,
                 }
             },
             title = { Text(
-                text = selectedName.value ?: Constants.NO_DATA
+                text = selectedName.value ?: NO_DATA
             ) },
             text = {
                 Text(
@@ -295,9 +298,9 @@ fun StockCard(
 fun StockTransaction(stockDetail: StockDetail?,
                      modifier: Modifier = Modifier) {
     val transaction = listOf(
-        stringResource(R.string.transaction) to (stockDetail?.transaction ?: Constants.NO_DATA),
-        stringResource(R.string.trade_volume) to (stockDetail?.tradeVolume ?: Constants.NO_DATA),
-        stringResource(R.string.trade_value) to (stockDetail?.tradeValue ?: Constants.NO_DATA)
+        stringResource(R.string.transaction) to (stockDetail?.transaction ?: NO_DATA),
+        stringResource(R.string.trade_volume) to (stockDetail?.tradeVolume ?: NO_DATA),
+        stringResource(R.string.trade_value) to (stockDetail?.tradeValue ?: NO_DATA)
     )
 
     Row(Modifier.padding(horizontal = 16.dp)) {
@@ -318,12 +321,12 @@ fun StockPriceGrid(stockDetail: StockDetail?,
                    stockAverage: StockAverage?,
                    modifier: Modifier = Modifier) {
     val details = listOf(
-        stringResource(R.string.opening_price) to (stockDetail?.openingPrice ?: Constants.NO_DATA),
-        stringResource(R.string.closeing_price) to (stockDetail?.closingPrice ?: Constants.NO_DATA),
-        stringResource(R.string.highest_price) to (stockDetail?.highestPrice ?: Constants.NO_DATA),
-        stringResource(R.string.lowest_price) to (stockDetail?.lowestPrice ?: Constants.NO_DATA),
-        stringResource(R.string.price_change) to (stockDetail?.change ?: Constants.NO_DATA),
-        stringResource(R.string.monthly_average_price) to (stockAverage?.monthlyAveragePrice ?: Constants.NO_DATA),
+        stringResource(R.string.opening_price) to (stockDetail?.openingPrice ?: NO_DATA),
+        stringResource(R.string.closeing_price) to (stockDetail?.closingPrice ?: NO_DATA),
+        stringResource(R.string.highest_price) to (stockDetail?.highestPrice ?: NO_DATA),
+        stringResource(R.string.lowest_price) to (stockDetail?.lowestPrice ?: NO_DATA),
+        stringResource(R.string.price_change) to (stockDetail?.change ?: NO_DATA),
+        stringResource(R.string.monthly_average_price) to (stockAverage?.monthlyAveragePrice ?: NO_DATA),
     )
 
     Column(
@@ -388,14 +391,14 @@ private fun StockTitle(stockDetail: StockDetail?,
                        modifier: Modifier = Modifier) {
     Column {
         Text(
-            text = stockDetail?.code ?: Constants.NO_DATA,
+            text = stockDetail?.code ?: NO_DATA,
             fontSize = 12.sp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, top = 8.dp)
         )
         Text(
-            text = stockDetail?.name ?: Constants.NO_NAME,
+            text = stockDetail?.name ?: NO_NAME,
             fontSize = 20.sp,
             modifier = Modifier
                 .padding(8.dp)
