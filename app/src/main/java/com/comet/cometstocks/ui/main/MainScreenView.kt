@@ -66,7 +66,7 @@ class MainScreenView {
             // only update UI when activity is in started state
             lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 stockViewModel.loadSortOrder()
-                stockViewModel.fetchAllConcurrently()
+                stockViewModel.fetchConcurrently()
             }
         }
 

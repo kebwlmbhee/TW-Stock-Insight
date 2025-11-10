@@ -76,5 +76,5 @@ class FakeMainViewModel : StockViewModel {
 
     override fun sortStockListByCode(sortOrder: SortOrder) {}
 
-    override suspend fun fetchAllConcurrently() {}
+    override suspend fun fetchConcurrently() {}
 }

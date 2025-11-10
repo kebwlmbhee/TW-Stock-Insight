@@ -13,5 +13,5 @@ interface StockViewModel {
 
     fun loadSortOrder()
     fun sortStockListByCode(sortOrder: SortOrder)
-    suspend fun fetchAllConcurrently()
+    suspend fun fetchConcurrently()
 }

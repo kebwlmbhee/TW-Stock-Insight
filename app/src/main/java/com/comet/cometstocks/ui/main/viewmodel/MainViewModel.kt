@@ -35,14 +35,7 @@ class MainViewModel(application: Application)
     override val stockBwiList = _stockBwiList.asStateFlow()
 
     // async must be called from a CoroutineScope
-    override suspend fun fetchAllConcurrently() {
-        while (true) {
-            fetchOnce()
-            delay(5000)
-        }
-    }
-
-    private suspend fun fetchOnce() = coroutineScope {
+    override suspend fun fetchConcurrently() = coroutineScope {
         val bwi = async { stockRepo.getStockBwi() }
         val average = async { stockRepo.getStockAverage() }
         val detail = async { stockRepo.getStockDetail() }
@@ -64,7 +57,7 @@ class MainViewModel(application: Application)
         }
         preferenceRepository.setSortOrder(currentSortOrder.value)
         viewModelScope.launch {
-            fetchOnce()
+            fetchConcurrently()
         }
     }
 
